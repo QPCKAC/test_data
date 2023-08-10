@@ -1,0 +1,70 @@
+import numpy as np
+import matplotlib
+import matplotlib.pyplot as plt
+import pandas as pd
+import sklearn as skl
+from sklearn import *
+import os
+
+Data = []
+Bfield = ['-2.15, 0.340', '-0.569, 0.220', '-0.560, 0.223', '-0.031, 0.032', '-0.306, 0.192', '-0.061, 0.193', '-3.02, 0.434', '-1.06, 0.264', '-.300, 0.203']
+MagPos = ['15, 0', '7, 0', '7, 0', '3, 1', '5, 0', '3, 0', '18, 0', '10, 0', '5, 0']
+folder = r'W:\shared\Jonathon\ODMR_BfieldBasesline\050423\Data'
+for files in os.listdir(folder):
+    df = pd.read_csv(os.path.join(folder,files), header = None)
+    Data.append(df)
+
+def MultiPlot(Data, MagPos,Bfield):
+     for idx1, data1 in enumerate(Data[5:]):
+         freq1 = data1[0]
+         inten1 = data1[1]
+         for idx, data in enumerate(Data[4:]):
+             freq = data[0]
+             inten = data[1]
+             fig, ax=plt.subplots() 
+             plt.plot(freq, inten, label = 'B1 and B2 ({})[mT]      Mag1 and Mag2 Position ({})'.format(Bfield[idx], MagPos[idx]))
+             plt.plot(freq1,inten1)
+             ax.set(xlabel="Frequency [MHz]", ylabel="Amplitude")
+             #plt.title('B1 and B2 ({})[mT]      Mag1 and Mag2 Position ({})'.format(Bfield[idx1], MagPos[idx1]), fontsize =8)
+             plt.legend()
+             #plt.savefig('test%d'%idx1)
+             plt.show()
+    
+    
+    
+def SinglePlot(Data, MagPos,Bfield):
+    for idx, data in enumerate(Data[4:]):
+        fig, ax=plt.subplots()
+        freq = data[0]
+        inten = skl.preprocessing.normalize(data[1])
+        plt.plot(freq, inten)
+        ax.set(xlabel="Frequency [MHz]", ylabel="Amplitude")
+        plt.title('B1 and B2 ({})[mT]\nMag2 and Mag1 Position ({})'.format(Bfield[idx], MagPos[idx]), fontsize =8)
+        plt.savefig('test%d'%idx)
+        plt.show()
+
+
+def Cauchy(Amp, x0, Gamma, Afit, Bfit):
+   g = Amp/(1 + ((x -x0)/Gamma^2))
+   return g
+
+    
+#multiplot =  MultiPlot(Data, MagPos,Bfield)
+#singleplot = SinglePlot(Data, MagPos,Bfield)
+#print(os.listdir(folder))
+
+freq = Data[4][0]
+inten = skl.preprocessing.minmax_scale(Data[4][1])
+
+freq1 = Data[8][0]
+inten1 = skl.preprocessing.minmax_scale(Data[8][1])
+
+fig, ax=plt.subplots()
+
+plt.plot(freq, inten, label ='B1 and B2 ({})[mT]\nMag2 and Mag1 Position ({})'.format(Bfield[4], MagPos[4]))
+plt.plot(freq1, inten1, label ='B1 and B2 ({})[mT]\nMag2 and Mag1 Position ({})'.format(Bfield[8], MagPos[8]))
+plt.legend(bbox_to_anchor = (1.05,1.15),loc = 'upper right')
+ax.set(xlabel="Frequency [MHz]", ylabel="Amplitude")
+ax.grid(which = 'both')
+#plt.savefig('dplot0')
+plt.show() 
